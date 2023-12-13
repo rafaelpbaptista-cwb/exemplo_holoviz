@@ -1,0 +1,92 @@
+# To reproduce: install 'anaconda-project', then 'anaconda-project run'
+name: holoviz_tutorial
+description: HoloViz Tutorial
+maintainers:
+- holoviz
+
+user_fields: [maintainers]
+channels:
+  - pyviz/label/dev
+  - conda-forge
+  - nodefaults
+
+packages: &pkgs
+- python=3.9
+- jinja2>=3.0.0
+- packaging
+- numpy
+- pandas
+- dask
+- xarray
+- notebook
+- matplotlib
+- ipympl
+- bokeh
+- datashader==0.15.1
+- param==1.13.0
+- netcdf4
+- fastparquet
+- jupyterlab
+- fsspec
+- hvplot==0.8.3
+- panel==1.2.0
+- holoviews==1.16.2
+- pyviz_comms >=2.3.2
+- plotly
+# We don't want to download mkl packages (which are large) mainly seen on Windows
+- nomkl
+# Docs deps, that used to be in a `doc` environment but locking is so slow.
+- nbsite ==0.8.3rc1
+# Test deps, that used to be in a `test` env, same reasons.
+- pytest
+- nbsmoke
+# To get things running
+- pandas ==2.0.3
+- fastparquet ==2023.7.0
+
+dependencies: *pkgs
+
+commands:
+  notebooks:
+    notebook: .
+  dashboard:
+    unix: cd tutorial; panel serve 06_Dashboards.ipynb --show
+  test:
+    unix:    pytest --nbsmoke-run -k ".ipynb" --ignore envs
+    windows: pytest --nbsmoke-run -k ".ipynb" --ignore envs
+  lint:
+    unix:    pytest --nbsmoke-lint -k ".ipynb" --ignore envs
+    windows: pytest --nbsmoke-lint -k ".ipynb" --ignore envs
+  conda_list:
+    unix: conda list
+    windows: conda list
+  doc_rst:
+    unix: nbsite generate-rst --org holoviz --project-name holoviz --offset 1 --skip envs --project-root .. --doc doc
+    windows: nbsite generate-rst --org holoviz --project-name holoviz --offset 1 --skip envs --project-root .. --doc doc
+  doc_build:
+    unix: nbsite build --what=html --output=../builtdocs --org holoviz --project-name holoviz --project-root .. --doc doc
+    windows: nbsite build --what=html --output=../builtdocs --org holoviz --project-name holoviz --project-root .. --doc doc
+
+# Optional, used to silence warnings about unused notebooks
+skip_imports:
+  notebooks: true
+
+platforms:
+- linux-64
+- osx-64
+- win-64
+- osx-arm64
+
+downloads:
+  DATA_1:
+    url: https://earth-data.s3.amazonaws.com/gpw_v4_population_density_rev11_2010_2pt5_min.zip
+    description: Population Raster
+    filename: data/raster
+  DATA_2:
+    url: https://datashader-data.s3.amazonaws.com/earthquakes-projected.parq
+    description: Earthquakes
+    filename: data/earthquakes-projected.parq
+  DATA_3:
+    url: https://raw.githubusercontent.com/holoviz/holoviz/main/examples/assets/usgs_logo.png
+    description: USGS Logo
+    filename: data/usgs_logo.png
